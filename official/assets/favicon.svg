@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#ff6b35"/><text x="9" y="43" font-family="Arial,sans-serif" font-size="36" font-weight="bold" letter-spacing="-4" fill="#111211">lw.</text></svg>
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lw" x1="7" y1="5" x2="57" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF7B3D"/>
+      <stop offset="1" stop-color="#E64818"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#111113"/>
+  <circle cx="32" cy="32" r="24" fill="url(#lw)"/>
+  <path d="M18 22V42H30V37H23.5V22H18ZM29 22L34.3 42H40.3L43.2 30.2L46 42H52L47.2 22H42L37.5 36.8L34 22H29Z" fill="white"/>
+</svg>

@@ -55,6 +55,20 @@
   const form = $('#request-form');
   const tabs = $$('[data-mode]');
   let mode = 'quote';
+  const categoryHints = {
+    'Network & IoT installation':
+      'Location, property type, rooms or coverage area, and devices to connect…',
+    'CCTV, intercom & security':
+      'Location, indoor or outdoor areas, number of cameras or intercom units…',
+    'Gift cards': 'Platform, account region / currency, and the gift-card amount…',
+  };
+  const updateCategoryHint = () => {
+    if (mode === 'quote')
+      form.elements.details.placeholder =
+        categoryHints[form.elements.category.value] ||
+        'Preferred model, storage, colour or budget…';
+  };
+  form.elements.category.addEventListener('change', updateCategoryHint);
   const setMode = (next) => {
     mode = next;
     tabs.forEach((tab) => {
@@ -64,7 +78,7 @@
     });
     $('#request-panel').setAttribute('aria-labelledby', `tab-${mode}`);
     $('#form-title').textContent =
-      mode === 'quote' ? 'What’s on your wishlist?' : 'Let’s get you up and running.';
+      mode === 'quote' ? 'What can we help you with?' : 'Let’s get you up and running.';
     $('#form-description').textContent =
       mode === 'quote'
         ? 'Tell us what you’re looking for. We’ll check the options.'
@@ -76,6 +90,7 @@
         ? 'Preferred model, storage, colour or budget…'
         : 'Describe the issue, when it started and any visible damage…';
     form.elements.details.required = mode === 'repair';
+    updateCategoryHint();
   };
   tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => setMode(tab.dataset.mode));
@@ -96,6 +111,7 @@
     link.addEventListener('click', () => {
       setMode('quote');
       form.elements.category.value = link.dataset.enquire;
+      updateCategoryHint();
     })
   );
   const repairCategories = {
@@ -135,12 +151,20 @@
       form.elements.phone.reportValidity();
       return;
     }
+    const enquiryType =
+      mode === 'repair'
+        ? 'repair enquiry'
+        : value('category') === 'Gift cards'
+        ? 'gift card enquiry'
+        : ['Network & IoT installation', 'CCTV, intercom & security'].includes(value('category'))
+        ? 'installation enquiry'
+        : 'product enquiry';
     const message = [
-      `Hello Live World — ${mode === 'repair' ? 'repair enquiry' : 'product enquiry'}`,
+      `Hello Live World — ${enquiryType}`,
       `Name: ${value('name')}`,
       `Phone: ${value('phone')}`,
       `Category: ${value('category')}`,
-      `Brand / model: ${value('model')}`,
+      `Product / platform / project: ${value('model')}`,
       `${mode === 'repair' ? 'Issue' : 'Requirements'}: ${
         value('details') || 'Please advise on available options.'
       }`,
