@@ -1,258 +1,283 @@
-const originalHero=document.querySelector('.hero');
-if(originalHero){
-  const poster=originalHero.querySelector('.hero-media img')?.getAttribute('src')||'';
-  originalHero.classList.add('cinematic-hero');
-  originalHero.style.setProperty('--hero-poster',`url("${poster}")`);
-  originalHero.innerHTML=`
-    <video class="cinematic-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-      <source src="https://assets.mixkit.co/videos/41638/41638-720.mp4" type="video/mp4">
-    </video>
-    <div class="gaming-grid" aria-hidden="true"></div>
-    <div class="gaming-light green" aria-hidden="true"></div>
-    <div class="gaming-light red" aria-hidden="true"></div>
-    <div class="cinematic-content">
-      <p class="esports-kicker">Mobile phones · accessories · gaming rigs · repairs</p>
-      <div class="hero-liveworld-logo" aria-label="Live World Electronics Trading LLC">
-        <span class="lw-symbol">LW</span>
-        <span><strong>LIVE WORLD</strong><small>ELECTRONICS TRADING LLC</small></span>
-      </div>
-      <h1 class="cinematic-title"><span>Unlock your</span>digital dreams.</h1>
-      <p class="hero-system-copy">Competitive gaming PCs, performance laptops, esports peripherals and expert technical support—built around the way you play.</p>
-    </div>
-    <span class="hero-scroll-cue" aria-hidden="true">Scroll to explore<i></i></span>`;
-
-  const heroVideo=originalHero.querySelector('.cinematic-video');
-  heroVideo.poster=poster;
-  heroVideo.addEventListener('canplay',()=>originalHero.classList.add('video-ready'),{once:true});
-  heroVideo.addEventListener('error',()=>originalHero.classList.add('video-failed'),{once:true});
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)heroVideo.pause();
-  else heroVideo.play().catch(()=>{});
-}
-
-const scrollAmbient=document.createElement('div');
-scrollAmbient.className='scroll-ambient';
-scrollAmbient.setAttribute('aria-hidden','true');
-scrollAmbient.innerHTML='<span class="ambient-orb"></span><span class="ambient-orb"></span>';
-document.body.append(scrollAmbient);
-
-const ambientSections=[
-  ['.cinematic-hero','gaming'],
-  ['.products','phones'],
-  ['.repair-section','repair'],
-  ['.delivery-band','gaming'],
-  ['.concierge-section','service'],
-  ['.reviews-section','reviews'],
-  ['.payment-experience','payments'],
-  ['.visit-section','locations']
-].map(([selector,theme])=>({element:document.querySelector(selector),theme})).filter(item=>item.element);
-
-let ambientFrame=0;
-const updateScrollExperience=()=>{
-  ambientFrame=0;
-  if(originalHero){
-    const heroRect=originalHero.getBoundingClientRect();
-    const heroProgress=Math.max(0,Math.min(1,-heroRect.top/(heroRect.height*.82)));
-    originalHero.style.setProperty('--hero-scroll',heroProgress.toFixed(3));
-  }
-  const focus=window.innerHeight*.48;
-  const active=ambientSections.reduce((nearest,item)=>{
-    const rect=item.element.getBoundingClientRect();
-    const distance=Math.abs(rect.top+Math.min(rect.height,window.innerHeight)*.5-focus);
-    return !nearest||distance<nearest.distance?{...item,distance}:nearest;
-  },null);
-  if(active)document.body.dataset.ambient=active.theme;
-};
-const scheduleAmbient=()=>{
-  if(!ambientFrame)ambientFrame=requestAnimationFrame(updateScrollExperience);
-};
-window.addEventListener('scroll',scheduleAmbient,{passive:true});
-window.addEventListener('resize',scheduleAmbient,{passive:true});
-updateScrollExperience();
-
-const branchButtons=[...document.querySelectorAll('.branch-switcher button')];
-const branchMap=document.querySelector('.map-card iframe');
-const branchMapCard=document.querySelector('.map-card');
-const visitHeading=document.querySelector('.visit-copy h2');
-const visitAddress=document.querySelector('.visit-copy address');
-if(branchMapCard&&branchMap){
-  branchMapCard.classList.add('map-embedded');
-  branchMapCard.insertAdjacentHTML('afterbegin',`
-    <div class="map-identity" aria-hidden="true">
-      <span class="map-pin">LW</span>
-      <span><small>LIVE WORLD · DUBAI</small><strong data-map-branch>Muhaisnah 4</strong></span>
-    </div>
-    <div class="map-loading" role="status" aria-live="polite">
-      <span class="map-loader-mark">LW</span>
-      <strong>Loading location</strong>
-      <small data-map-loading-label>Muhaisnah 4</small>
-      <i aria-hidden="true"></i>
-    </div>`);
-}
-const mapBranchLabel=branchMapCard?.querySelector('[data-map-branch]');
-const mapLoadingLabel=branchMapCard?.querySelector('[data-map-loading-label]');
-let mapLoadTimer=0;
-const finishMapLoad=()=>{
-  window.clearTimeout(mapLoadTimer);
-  branchMapCard?.classList.remove('is-switching');
-};
-const beginMapLoad=()=>{
-  window.clearTimeout(mapLoadTimer);
-  branchMapCard?.classList.add('is-switching');
-  mapLoadTimer=window.setTimeout(finishMapLoad,5000);
-};
-beginMapLoad();
-const branchLocations=[
-  {
-    name:'Muhaisnah 4',
-    address:['Shop No. 1, Mango Hypermarket Building','Muhaisnah 4, near Lulu Village','Dubai, UAE'],
-    query:'Live World Hub Electronics LLC Muhaisnah 4 Dubai'
-  },
-  {
-    name:'Al Warqaa 1',
-    address:['Q1 Mall, Al Warqaa 1 Street','Ground Floor','Dubai, UAE'],
-    query:'Live World Electronics Q1 Mall Al Warqaa 1 Dubai'
-  },
-  {
-    name:'Mirdif',
-    address:['Near Abaya Mall','Mirdif','Dubai, UAE'],
-    query:'Live World Electronics near Abaya Mall Mirdif Dubai'
-  },
-  {
-    name:'Oud Al Muteena',
-    address:['Emirates Co-operative Society','Oud Al Muteena 1','Dubai, UAE'],
-    query:'Live World Electronics Emirates Cooperative Society Oud Al Muteena 1 Dubai'
-  },
-  {
-    name:'Al Khawaneej',
-    address:['Live World Electronics','Al Khawaneej','Dubai, UAE'],
-    query:'Live World Electronics Al Khawaneej Dubai'
-  }
-];
-
-const selectBranch=index=>{
-  const branch=branchLocations[index];
-  if(!branch||!branchMap)return;
-  branchButtons.forEach((button,buttonIndex)=>{
-    const selected=buttonIndex===index;
-    button.classList.toggle('active',selected);
-    button.setAttribute('aria-pressed',String(selected));
+'use strict';
+(() => {
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => [...document.querySelectorAll(selector)];
+  const whatsapp = 'https://wa.me/971559956683';
+  const menu = $('#main-nav');
+  const toggle = $('.menu-toggle');
+  const closeMenu = () => {
+    menu.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+  };
+  toggle.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') !== 'true';
+    menu.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   });
-  visitHeading.innerHTML=`${branch.name},<br>Dubai.`;
-  visitAddress.innerHTML=branch.address.join('<br>');
-  if(mapBranchLabel)mapBranchLabel.textContent=branch.name;
-  if(mapLoadingLabel)mapLoadingLabel.textContent=branch.name;
-  branchMap.title=`Google Map showing ${branch.name} branch`;
-  beginMapLoad();
-  branchMap.src=`https://www.google.com/maps?q=${encodeURIComponent(branch.query)}&output=embed`;
-};
+  menu.addEventListener('click', (event) => {
+    if (event.target.closest('a')) closeMenu();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      closeMenu();
+      toggle.focus();
+    }
+  });
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.site-header')) closeMenu();
+  });
+  window.matchMedia('(min-width: 761px)').addEventListener('change', closeMenu);
 
-branchMap?.addEventListener('load',finishMapLoad);
-branchButtons.forEach((button,index)=>button.addEventListener('click',()=>selectBranch(index)));
-branchButtons.forEach((button,index)=>button.setAttribute('aria-pressed',String(index===0)));
+  const filterButtons = $$('[data-filter]');
+  filterButtons.forEach((button) =>
+    button.addEventListener('click', () => {
+      filterButtons.forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle('active', selected);
+        item.setAttribute('aria-pressed', String(selected));
+      });
+      let count = 0;
+      $$('[data-category]').forEach((card) => {
+        const show =
+          button.dataset.filter === 'all' || button.dataset.filter === card.dataset.category;
+        card.hidden = !show;
+        card.classList.toggle('fade-in', show);
+        if (show) count++;
+      });
+      $('#filter-status').textContent = `Showing ${count} ${
+        count === 1 ? 'category' : 'categories'
+      }`;
+    })
+  );
 
-const form=document.querySelector('.concierge-form');
-const buttons=[...document.querySelectorAll('.form-tabs button')];
-const formTitle=document.querySelector('.form-heading h3');
-const formCopy=document.querySelector('.form-heading p');
-const serviceSelect=form?.querySelector('[name="service"]');
-const remarksField=form?.querySelector('[name="remarks"]');
-const serviceLabel=serviceSelect?.closest('label');
-const remarksLabel=remarksField?.closest('label');
-const submitButton=form?.querySelector('button[type="submit"]');
-let mode='repair';
+  const form = $('#request-form');
+  const tabs = $$('[data-mode]');
+  let mode = 'quote';
+  const setMode = (next) => {
+    mode = next;
+    tabs.forEach((tab) => {
+      const selected = tab.dataset.mode === mode;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    });
+    $('#request-panel').setAttribute('aria-labelledby', `tab-${mode}`);
+    $('#form-title').textContent =
+      mode === 'quote' ? 'What’s on your wishlist?' : 'Let’s get you up and running.';
+    $('#form-description').textContent =
+      mode === 'quote'
+        ? 'Tell us what you’re looking for. We’ll check the options.'
+        : 'Share your device and symptoms. We’ll help with the next step.';
+    $('#details-label').textContent =
+      mode === 'quote' ? 'A few more details' : 'What seems to be the problem?';
+    form.elements.details.placeholder =
+      mode === 'quote'
+        ? 'Preferred model, storage, colour or budget…'
+        : 'Describe the issue, when it started and any visible damage…';
+    form.elements.details.required = mode === 'repair';
+  };
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => setMode(tab.dataset.mode));
+    tab.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const target =
+        event.key === 'Home'
+          ? 0
+          : event.key === 'End'
+          ? tabs.length - 1
+          : (index + 1) % tabs.length;
+      setMode(tabs[target].dataset.mode);
+      tabs[target].focus();
+    });
+  });
+  $$('[data-enquire]').forEach((link) =>
+    link.addEventListener('click', () => {
+      setMode('quote');
+      form.elements.category.value = link.dataset.enquire;
+    })
+  );
+  const repairCategories = {
+    'Mobile phone': 'Smartphones & accessories',
+    Laptop: 'Laptops',
+    'Gaming console': 'Gaming consoles & accessories',
+    'Gaming PC': 'Custom gaming PC',
+  };
+  $$('[data-repair]').forEach((link) =>
+    link.addEventListener('click', () => {
+      setMode('repair');
+      form.elements.category.value = repairCategories[link.dataset.repair];
+    })
+  );
+  $$('[data-mode-link]').forEach((link) =>
+    link.addEventListener('click', () => setMode(link.dataset.modeLink))
+  );
 
-const formModes={
-  repair:{
-    title:'Service or repair booking',
-    copy:'Enter the device and complaint details below.',
-    serviceLabel:'Service required',
-    servicePlaceholder:'Select service',
-    services:['Device diagnosis','Screen repair','Battery or charging','No power or no display','Software or data','Cleaning or overheating','Upgrade or custom build','Other'],
-    remarksLabel:'Remarks / complaint',
-    remarksPlaceholder:'Describe the issue, damage or symptoms',
-    submit:'Continue on WhatsApp'
-  },
-  quote:{
-    title:'Phone quotation',
-    copy:'Tell us the phone brand, model, colour and storage you need.',
-    serviceLabel:'Quotation type',
-    servicePlaceholder:'Select request',
-    services:['New phone price and availability','Trade-in enquiry','Phone accessories','Business or bulk purchase','Other'],
-    remarksLabel:'Colour, storage & requirements',
-    remarksPlaceholder:'Example: Natural Titanium, 256 GB, UAE version',
-    submit:'Request quote on WhatsApp'
+  const dialog = $('#request-dialog');
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    for (const key of ['name', 'model', 'details']) {
+      const field = form.elements[key];
+      field.setCustomValidity(
+        field.required && !field.value.trim() ? 'Please enter a value, not only spaces.' : ''
+      );
+    }
+    if (!form.reportValidity()) return;
+    const data = new FormData(form);
+    const value = (key) => String(data.get(key) || '').trim();
+    if (
+      !/^[+\d\s().-]+$/.test(value('phone')) ||
+      value('phone').replace(/\D/g, '').length < 7 ||
+      value('phone').replace(/\D/g, '').length > 15
+    ) {
+      form.elements.phone.setCustomValidity('Please enter a phone number with 7 to 15 digits.');
+      form.elements.phone.reportValidity();
+      return;
+    }
+    const message = [
+      `Hello Live World — ${mode === 'repair' ? 'repair enquiry' : 'product enquiry'}`,
+      `Name: ${value('name')}`,
+      `Phone: ${value('phone')}`,
+      `Category: ${value('category')}`,
+      `Brand / model: ${value('model')}`,
+      `${mode === 'repair' ? 'Issue' : 'Requirements'}: ${
+        value('details') || 'Please advise on available options.'
+      }`,
+      `Preferred branch: ${value('branch')}`,
+    ].join('\n');
+    $('#request-preview').textContent = message;
+    $('#whatsapp-request').href = `${whatsapp}?text=${encodeURIComponent(message)}`;
+    dialog.showModal();
+  });
+  for (const key of ['name', 'model', 'details']) {
+    form.elements[key].addEventListener('input', () => form.elements[key].setCustomValidity(''));
   }
-};
-
-const setLabelText=(label,text)=>{
-  const textNode=[...label.childNodes].find(node=>node.nodeType===Node.TEXT_NODE);
-  if(textNode)textNode.nodeValue=text;
-};
-
-const setSubmitText=text=>{
-  const textNode=[...submitButton.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim());
-  if(textNode)textNode.nodeValue=` ${text} `;
-};
-
-const updateMode=next=>{
-  mode=next;
-  const config=formModes[mode];
-  buttons.forEach((button,index)=>{
-    const buttonMode=index===0?'repair':'quote';
-    const selected=buttonMode===mode;
-    button.classList.toggle('active',selected);
-    button.setAttribute('aria-selected',String(selected));
+  form.elements.phone.addEventListener('input', () => form.elements.phone.setCustomValidity(''));
+  $('#close-dialog').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) {
+      const rect = dialog.getBoundingClientRect();
+      if (
+        event.clientX < rect.left ||
+        event.clientX > rect.right ||
+        event.clientY < rect.top ||
+        event.clientY > rect.bottom
+      )
+        dialog.close();
+    }
   });
-  formTitle.textContent=config.title;
-  formCopy.textContent=config.copy;
-  setLabelText(serviceLabel,config.serviceLabel);
-  serviceSelect.innerHTML=`<option value="" disabled selected>${config.servicePlaceholder}</option>`+config.services.map(item=>`<option>${item}</option>`).join('');
-  setLabelText(remarksLabel,config.remarksLabel);
-  remarksField.placeholder=config.remarksPlaceholder;
-  setSubmitText(config.submit);
-};
+  // Modal Escape handling, focus trapping and focus restoration are native <dialog> behaviour.
 
-buttons.forEach((button,index)=>button.addEventListener('click',()=>updateMode(index===0?'repair':'quote')));
-updateMode('repair');
-
-form?.addEventListener('submit',event=>{
-  event.preventDefault();
-  const data=new FormData(form);
-  const text=[mode==='repair'?'Repair booking':'Phone quotation',`Name: ${data.get('name')}`,`WhatsApp: ${data.get('phone')}`,`Brand: ${data.get('brand')}`,`Model: ${data.get('model')}`,`${mode==='repair'?'Service':'Quotation type'}: ${data.get('service')}`,`${mode==='repair'?'Complaint / remarks':'Colour, storage & requirements'}: ${data.get('remarks')}`].join('\n');
-  window.open('https://wa.me/971559956683?text='+encodeURIComponent(text),'_blank','noopener');
-});
-
-document.querySelector('.menu-toggle')?.addEventListener('click',()=>document.querySelector('nav')?.scrollIntoView({behavior:'smooth'}));
-
-fetch('https://countapi.mileshilliard.com/api/v1/hit/liveworldhub-github-pages-official-2026')
-  .then(response=>response.json())
-  .then(data=>{
-    const counter=document.querySelector('.site-view-count > span');
-    const count=Number(data.value);
-    if(counter&&Number.isFinite(count))counter.textContent=count.toLocaleString();
-  })
-  .catch(()=>{});
-
-const footerPaymentLogos=document.querySelector('#footer-payment-logos');
-if(footerPaymentLogos){
-  const sourceLogos=[...document.querySelectorAll('.payment-brand-rail img'),...document.querySelectorAll('.bnpl-logo img')];
-  footerPaymentLogos.textContent='';
-
-  const contactless=document.createElement('span');
-  contactless.className='footer-pay-logo footer-contactless';
-  contactless.setAttribute('role','img');
-  contactless.setAttribute('aria-label','Contactless NFC payments');
-  contactless.innerHTML='<svg viewBox="0 0 32 24" aria-hidden="true"><path d="M7 18c3.3-3.3 3.3-8.7 0-12M12 20.5c4.7-4.7 4.7-12.3 0-17M17 23c6.1-6.1 6.1-15.9 0-22"/><circle cx="3.5" cy="12" r="1.8"/></svg>';
-  footerPaymentLogos.append(contactless);
-
-  sourceLogos.forEach(source=>{
-    const holder=document.createElement('span');
-    holder.className='footer-pay-logo';
-    const logo=source.cloneNode();
-    logo.removeAttribute('width');
-    logo.removeAttribute('height');
-    logo.loading='eager';
-    holder.append(logo);
-    footerPaymentLogos.append(holder);
+  const branches = [
+    {
+      name: 'Muhaisnah 4',
+      address: 'Shop No. 1, Mango Hypermarket Building, Muhaisnah 4, near Lulu Village, Dubai, UAE',
+      query: 'Live World Electronics Trading LLC Mango Hypermarket Muhaisnah 4 Dubai',
+    },
+    {
+      name: 'Al Warqaa 1',
+      address: 'Q1 Mall, Al Warqaa 1 Street, Ground Floor, Dubai, UAE',
+      query: 'Live World Electronics Q1 Mall Al Warqaa 1 Dubai',
+    },
+    {
+      name: 'Mirdif',
+      address: 'Near Abaya Mall, Mirdif, Dubai, UAE',
+      query: 'Live World Electronics near Abaya Mall Mirdif Dubai',
+    },
+    {
+      name: 'Oud Al Muteena',
+      address: 'Emirates Co-operative Society, Oud Al Muteena 1, Dubai, UAE',
+      query: 'Live World Electronics Emirates Cooperative Society Oud Al Muteena 1 Dubai',
+    },
+    {
+      name: 'Al Khawaneej',
+      address: 'Live World Electronics, Al Khawaneej, Dubai, UAE',
+      query: 'Live World Electronics Al Khawaneej Dubai',
+    },
+  ];
+  let currentBranch = 0;
+  let mapTimer;
+  const mapShell = $('#map-shell');
+  const loadMap = $('#load-map');
+  const mapStatus = $('#map-status');
+  const resetMap = () => {
+    clearTimeout(mapTimer);
+    mapShell.querySelector('iframe')?.remove();
+    loadMap.hidden = false;
+    loadMap.disabled = false;
+    loadMap.innerHTML = 'Explore this location <span aria-hidden="true">↗</span>';
+    mapStatus.textContent = '';
+  };
+  $$('[data-branch]').forEach((button) =>
+    button.addEventListener('click', () => {
+      currentBranch = Number(button.dataset.branch);
+      const branch = branches[currentBranch];
+      $$('[data-branch]').forEach((item) => {
+        item.classList.toggle('active', item === button);
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      $('#branch-name').textContent = branch.name;
+      $('#branch-address').textContent = branch.address;
+      $(
+        '#directions-link'
+      ).href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        branch.query
+      )}`;
+      form.elements.branch.value = branch.name;
+      resetMap();
+    })
+  );
+  loadMap.addEventListener('click', () => {
+    const branch = branches[currentBranch];
+    const frame = document.createElement('iframe');
+    frame.title = `Google Map — Live World ${branch.name}`;
+    frame.referrerPolicy = 'no-referrer-when-downgrade';
+    frame.src = `https://www.google.com/maps?q=${encodeURIComponent(branch.query)}&output=embed`;
+    frame.hidden = true;
+    loadMap.disabled = true;
+    mapStatus.textContent = 'Opening the map…';
+    frame.addEventListener(
+      'load',
+      () => {
+        if (!frame.isConnected) return;
+        clearTimeout(mapTimer);
+        frame.hidden = false;
+        loadMap.hidden = true;
+        mapStatus.textContent = '';
+      },
+      { once: true }
+    );
+    mapTimer = setTimeout(() => {
+      frame.remove();
+      loadMap.disabled = false;
+      mapStatus.textContent = 'Map unavailable here. Use Get directions below.';
+    }, 8000);
+    mapShell.append(frame);
   });
-}
+  $('#year').textContent = String(new Date().getFullYear());
+
+  // Navigation highlighting only; content remains visible if scripting or observers are unavailable.
+  if ('IntersectionObserver' in window) {
+    const navLinks = $$('#main-nav a');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            navLinks.forEach((link) => {
+              const selected = link.hash === `#${entry.target.id}`;
+              link.classList.toggle('active', selected);
+              if (selected) link.setAttribute('aria-current', 'location');
+              else link.removeAttribute('aria-current');
+            });
+          }
+        });
+      },
+      { rootMargin: '-15% 0px -60% 0px', threshold: 0 }
+    );
+    navLinks.forEach((link) => {
+      const target = $(link.hash);
+      if (target) observer.observe(target);
+    });
+  }
+})();

@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/serve-storefront.mjs",
+    "build": "node scripts/build-storefront.mjs",
     "start": "next start",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "dev:dashboard": "next dev",
+    "build:dashboard": "next build",
+    "test": "node --test scripts/storefront.test.mjs"
   },
   "private": true,
   "dependencies": {
