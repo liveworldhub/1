@@ -2852,3 +2852,7 @@ dialog .button {
 .installation-photo {display:block;width:calc(100% + 68px);max-width:none;height:220px;object-fit:cover;margin:-34px -34px 28px;}
 @media(max-width:1000px){.installation-photo{width:calc(100% + 48px);margin:-24px -24px 24px}.brand-strip > div{gap:20px}.brand-strip .brand-logo{width:75px}}
 @media(max-width:760px){.brand-strip > div{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;justify-items:center;width:100%}.brand-strip .brand-logo{width:82px}.product-card.network-card,.product-card.security-card{min-height:550px}.product-card .category-photo{height:250px;bottom:65px}.product-card.gift-card{min-height:580px}.gift-card .product-copy{max-width:100%}.gift-card .category-photo{left:24px;right:24px;width:calc(100% - 48px);height:240px;bottom:75px}.installation-photo{height:230px}}
+
+.console-card > img {height:44%;width:70%;}
+.gift-card .category-photo {object-fit:contain;}
+.brand-strip .brand-logo:nth-child(2),.brand-strip .brand-logo:nth-child(3){height:26px;}
