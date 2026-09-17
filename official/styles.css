@@ -2833,3 +2833,22 @@ dialog .button {
     margin-top: 22px;
   }
 }
+
+/* Actual brand assets and photographic category collections. */
+.brand-strip > div {align-items:center;justify-content:space-between;gap:28px;}
+.brand-strip .brand-logo {display:block;width:95px;height:46px;object-fit:contain;opacity:.82;}
+.brand-strip .brand-logo:first-child {width:42px;height:42px;}
+.brand-strip .brand-logo:nth-child(4),.brand-strip .brand-logo:nth-child(5),.brand-strip .brand-logo:nth-child(6){width:52px;}
+.payment-logos .payment-logo {width:72px;height:42px;object-fit:contain;}
+.product-card.network-card,.product-card.security-card {min-height:570px;}
+.product-card .category-photo {position:absolute;left:0;right:0;bottom:66px;width:100%;height:280px;object-fit:cover;z-index:0;}
+.network-card .product-copy,.security-card .product-copy {max-width:100%;}
+.network-card .product-copy p,.security-card .product-copy p {max-width:360px;}
+.gift-card {min-height:400px;}
+.gift-card .product-copy {max-width:45%;}
+.gift-card .category-photo {left:auto;right:32px;bottom:76px;width:47%;height:280px;object-fit:cover;border-radius:18px;transform:rotate(-3deg);box-shadow:0 16px 35px #24284b25;}
+.console-card > img {object-fit:contain;mix-blend-mode:multiply;}
+.installation-grid article {overflow:hidden;}
+.installation-photo {display:block;width:calc(100% + 68px);max-width:none;height:220px;object-fit:cover;margin:-34px -34px 28px;}
+@media(max-width:1000px){.installation-photo{width:calc(100% + 48px);margin:-24px -24px 24px}.brand-strip > div{gap:20px}.brand-strip .brand-logo{width:75px}}
+@media(max-width:760px){.brand-strip > div{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;justify-items:center;width:100%}.brand-strip .brand-logo{width:82px}.product-card.network-card,.product-card.security-card{min-height:550px}.product-card .category-photo{height:250px;bottom:65px}.product-card.gift-card{min-height:580px}.gift-card .product-copy{max-width:100%}.gift-card .category-photo{left:24px;right:24px;width:calc(100% - 48px);height:240px;bottom:75px}.installation-photo{height:230px}}
